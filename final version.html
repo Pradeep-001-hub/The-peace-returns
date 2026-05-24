@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katana no Pradeep</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --blood: #8b0000;
+    --blood-bright: #cc0000;
+    --gold: #c9a84c;
+    --gold-bright: #ffd700;
+    --dark: #0a0805;
+    --dark2: #12100a;
+    --dark3: #1c1710;
+    --panel: #16120c;
+    --text: #e8dcc8;
+    --text-dim: #9a8a72;
+    --green: #2d6a2d;
+    --green-bright: #4caf50;
+    --blue: #1a3a5c;
+    --blue-bright: #4a9eff;
+    --ink: #2a1f14;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  canvas { display: none; }
+
+  /* =================== SCREENS =================== */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .screen.active { display: flex; }
+
+  /* =================== TITLE SCREEN =================== */
+  #title-screen {
+    background: radial-gradient(ellipse at center, #1a0f05 0%, #0a0805 70%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .title-bg-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .title-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .title-jp {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(12px, 2vw, 18px);
+    color: var(--gold);
+    letter-spacing: 0.8em;
+    opacity: 0.7;
+    margin-bottom: 8px;
+    animation: fadeIn 2s ease forwards;
+  }
+
+  .title-main {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(42px, 8vw, 100px);
+    font-weight: 900;
+    color: var(--text);
+    text-shadow:
+      0 0 40px rgba(201,168,76,0.4),
+      0 0 80px rgba(139,0,0,0.3),
+      2px 2px 0 #000;
+    line-height: 0.9;
+    animation: titleDrop 1.2s cubic-bezier(0.2,0.8,0.3,1) forwards;
+    letter-spacing: 0.05em;
+  }
+
+  .title-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 5vw, 64px);
+    font-weight: 700;
+    color: var(--gold-bright);
+    text-shadow:
+      0 0 30px rgba(255,215,0,0.5),
+      0 0 60px rgba(201,168,76,0.3);
+    animation: titleDrop 1.4s cubic-bezier(0.2,0.8,0.3,1) forwards;
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+
+  .title-divider {
+    width: 300px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px 0;
+    animation: expandWidth 1.5s ease forwards;
+  }
+
+  .title-subtitle {
+    font-size: clamp(14px, 2vw, 20px);
+    color: var(--text-dim);
+    letter-spacing: 0.3em;
+    font-style: italic;
+    animation: fadeIn 2.5s ease forwards;
+    margin-bottom: 40px;
+  }
+
+  .title-sword {
+    font-size: clamp(40px, 6vw, 70px);
+    margin: 10px 0;
+    animation: swordPulse 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px rgba(201,168,76,0.6));
+  }
+
+  .btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2vw, 18px);
+    font-weight: 700;
+    color: var(--dark);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-bright) 50%, var(--gold) 100%);
+    border: none;
+    padding: 14px 48px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    transition: all 0.2s ease;
+    animation: fadeIn 3s ease forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+  }
+
+  .btn-primary:hover::before { transform: translateX(100%); }
+  .btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255,215,0,0.4);
+  }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(12px, 1.5vw, 15px);
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 10px 32px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 12px;
+  }
+  .btn-secondary:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+
+  .title-warning {
+    position: absolute;
+    bottom: 30px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+    font-style: italic;
+  }
+
+  /* =================== ORIGIN SCREEN =================== */
+  #origin-screen {
+    background: linear-gradient(180deg, #0a0602 0%, #100c06 100%);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .story-container {
+    max-width: 680px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .story-scene {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeIn 0.8s ease forwards;
+  }
+  .story-scene.active { display: flex; }
+
+  .scene-header {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(11px, 1.5vw, 13px);
+    color: var(--gold);
+    letter-spacing: 0.4em;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+
+  .story-text {
+    font-size: clamp(15px, 2vw, 18px);
+    line-height: 1.8;
+    color: var(--text);
+  }
+
+  .story-text .highlight {
+    color: var(--blood-bright);
+    font-weight: 600;
+  }
+
+  .story-text .gold-text {
+    color: var(--gold-bright);
+    font-style: italic;
+  }
+
+  .flash-text {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--blood-bright);
+    text-align: center;
+    padding: 16px;
+    border: 1px solid var(--blood);
+    background: rgba(139,0,0,0.1);
+    letter-spacing: 0.15em;
+    animation: flashPulse 2s ease-in-out infinite;
+  }
+
+  .choice-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .choice-btn {
+    background: rgba(22,18,12,0.9);
+    border: 1px solid rgba(201,168,76,0.25);
+    color: var(--text);
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-family: 'Crimson Text', serif;
+    font-size: clamp(14px, 1.8vw, 16px);
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .choice-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+  }
+
+  .choice-btn:hover {
+    background: rgba(201,168,76,0.08);
+    border-color: var(--gold);
+    transform: translateX(4px);
+  }
+  .choice-btn:hover::before { transform: scaleY(1); }
+
+  .choice-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .choice-reward {
+    font-size: 12px;
+    color: var(--green-bright);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  /* =================== GAME SCREEN =================== */
+  #game-screen {
+    background: #0a0805;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  /* --- BATTLE ARENA --- */
+  .battle-arena {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    background: linear-gradient(180deg,
+      #1a1008 0%,
+      #0f0a04 40%,
+      #0a0602 100%
+    );
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  /* Background layers */
+  .arena-sky {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(180,60,0,0.15) 0%, transparent 60%);
+  }
+
+  .arena-moon {
+    position: absolute;
+    top: 12%;
+    right: 15%;
+    width: clamp(40px, 6vw, 70px);
+    height: clamp(40px, 6vw, 70px);
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff9e8 0%, #f0d890 60%, #c8a040 100%);
+    box-shadow: 0 0 30px rgba(240,216,144,0.4), 0 0 60px rgba(200,160,64,0.2);
+    animation: moonGlow 4s ease-in-out infinite;
+  }
+
+  .arena-mountains {
+    position: absolute;
+    bottom: 30%;
+    left: 0; right: 0;
+    height: 35%;
+    background:
+      linear-gradient(180deg, transparent 0%, #0d0908 100%);
+  }
+
+  .mountain-svg {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .arena-ground {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 30%;
+    background: linear-gradient(180deg,
+      #1a0f06 0%,
+      #120a04 50%,
+      #0c0702 100%
+    );
+  }
+
+  .ground-line {
+    position: absolute;
+    top: 0;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+  }
+
+  .arena-particles-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* --- CHARACTERS --- */
+  .characters-layer {
+    position: absolute;
+    bottom: 30%;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 8%;
+  }
+
+  .character-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .character-name-tag {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(9px, 1.2vw, 12px);
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    text-shadow: 0 0 10px rgba(201,168,76,0.5);
+  }
+
+  .character-sprite {
+    width: clamp(60px, 8vw, 100px);
+    height: clamp(90px, 13vw, 150px);
+    position: relative;
+    transition: transform 0.1s ease;
+  }
+
+  /* PRADEEP SVG character */
+  .pradeep-sprite {
+    filter: drop-shadow(0 0 8px rgba(201,168,76,0.3));
+  }
+
+  .enemy-sprite {
+    filter: drop-shadow(0 0 8px rgba(139,0,0,0.4));
+    transform: scaleX(-1);
+  }
+
+  .character-shadow {
+    width: clamp(40px, 6vw, 80px);
+    height: 8px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.6) 0%, transparent 70%);
+    margin-top: 2px;
+  }
+
+  /* Attack animations */
+  .attack-anim { animation: attackSlash 0.3s ease forwards; }
+  .hit-anim { animation: hitRecoil 0.3s ease forwards; }
+  .heavy-anim { animation: heavySlash 0.5s ease forwards; }
+  .death-anim { animation: deathFall 0.8s ease forwards; }
+  .idle-anim { animation: idleFloat 3s ease-in-out infinite; }
+  .enemy-idle { animation: enemyIdle 2.5s ease-in-out infinite; }
+
+  /* Slash effect */
+  .slash-effect {
+    position: absolute;
+    pointer-events: none;
+    font-size: clamp(30px, 5vw, 60px);
+    animation: slashFade 0.5s ease forwards;
+    z-index: 20;
+  }
+
+  .damage-number {
+    position: absolute;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 900;
+    pointer-events: none;
+    animation: dmgFloat 1s ease forwards;
+    z-index: 25;
+    text-shadow: 2px 2px 0 #000;
+  }
+
+  .dmg-normal { color: #fff; }
+  .dmg-heavy { color: var(--gold-bright); font-size: clamp(22px, 3.5vw, 34px); }
+  .dmg-enemy { color: var(--blood-bright); }
+  .dmg-heal { color: var(--green-bright); }
+
+  /* --- HUD TOP --- */
+  .hud-top {
+    width: 100%;
+    padding: clamp(8px, 1.5vw, 14px) clamp(12px, 2vw, 24px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(10,8,5,0.95) 0%, transparent 100%);
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    gap: 12px;
+  }
+
+  .hud-player-section, .hud-enemy-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .hud-enemy-section { align-items: flex-end; }
+
+  .hud-char-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(10px, 1.5vw, 14px);
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bar-label {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(8px, 1vw, 10px);
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    height: clamp(6px, 1vw, 10px);
+    background: rgba(255,255,255,0.06);
+    border-radius: 0;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    border: 1px solid rgba(255,255,255,0.05);
+    min-width: 80px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    transition: width 0.4s ease;
+    position: relative;
+  }
+
+  .bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40%;
+    background: rgba(255,255,255,0.2);
+  }
+
+  .hp-fill {
+    background: linear-gradient(90deg, #8b0000, #cc3333);
+  }
+
+  .hp-fill.low {
+    background: linear-gradient(90deg, #4a0000, #8b0000);
+    animation: hpPulse 1s ease-in-out infinite;
+  }
+
+  .stamina-fill {
+    background: linear-gradient(90deg, #1a5c2a, #2d9e4a);
+  }
+
+  .enemy-hp-fill {
+    background: linear-gradient(90deg, #5c1a00, #cc4400);
+    margin-left: auto;
+  }
+
+  .bar-value {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(8px, 1vw, 10px);
+    color: var(--text-dim);
+    min-width: 50px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* Level badge */
+  .level-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .level-num {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    text-shadow: 0 0 15px rgba(201,168,76,0.4);
+  }
+
+  .level-label {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(7px, 1vw, 9px);
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .xp-bar-mini {
+    width: clamp(40px, 6vw, 60px);
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .xp-fill-mini {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.5s ease;
+  }
+
+  /* --- BOTTOM PANEL --- */
+  .bottom-panel {
+    width: 100%;
+    background: linear-gradient(180deg, rgba(10,8,5,0) 0%, rgba(10,8,5,0.98) 15%);
+    padding: clamp(6px, 1vw, 12px) clamp(10px, 1.5vw, 20px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 1vw, 10px);
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Log */
+  .battle-log {
+    background: rgba(10,8,5,0.7);
+    border: 1px solid rgba(201,168,76,0.1);
+    padding: clamp(6px, 1vw, 10px) clamp(10px, 1.5vw, 16px);
+    min-height: clamp(36px, 5vw, 56px);
+    max-height: clamp(56px, 8vw, 80px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 2px;
+  }
+
+  .log-line {
+    font-size: clamp(12px, 1.6vw, 15px);
+    color: var(--text-dim);
+    line-height: 1.3;
+    transition: all 0.3s ease;
+  }
+
+  .log-line.new {
+    color: var(--text);
+    font-size: clamp(13px, 1.8vw, 16px);
+  }
+
+  .log-line .log-dmg { color: var(--blood-bright); font-weight: 600; }
+  .log-line .log-heal { color: var(--green-bright); }
+  .log-line .log-gold { color: var(--gold); }
+  .log-line .log-boss { color: var(--gold-bright); font-style: italic; }
+
+  /* Action buttons */
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(6px, 1vw, 10px);
+  }
+
+  .action-btn {
+    background: rgba(22,18,12,0.95);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--text);
+    padding: clamp(8px, 1.2vw, 14px) clamp(6px, 1vw, 12px);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: center;
+    font-family: 'Crimson Text', serif;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .action-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(201,168,76,0.06) 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .action-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  }
+  .action-btn:hover:not(:disabled)::before { opacity: 1; }
+  .action-btn:active:not(:disabled) { transform: translateY(0); }
+
+  .action-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .action-icon {
+    font-size: clamp(18px, 3vw, 28px);
+    line-height: 1;
+  }
+
+  .action-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(8px, 1.1vw, 11px);
+    letter-spacing: 0.08em;
+    color: var(--gold);
+  }
+
+  .action-desc {
+    font-size: clamp(9px, 1.1vw, 12px);
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .action-cost {
+    font-size: clamp(8px, 1vw, 10px);
+    color: var(--green-bright);
+    font-family: 'Cinzel', serif;
+  }
+
+  .action-btn.strike-btn { border-color: rgba(200,100,50,0.3); }
+  .action-btn.strike-btn:hover:not(:disabled) { border-color: #c86432; background: rgba(200,100,50,0.1); }
+
+  .action-btn.heavy-btn { border-color: rgba(180,50,0,0.3); }
+  .action-btn.heavy-btn:hover:not(:disabled) { border-color: var(--blood-bright); background: rgba(180,50,0,0.1); }
+
+  .action-btn.parry-btn { border-color: rgba(74,158,255,0.3); }
+  .action-btn.parry-btn:hover:not(:disabled) { border-color: var(--blue-bright); background: rgba(74,158,255,0.1); }
+
+  .action-btn.heal-btn { border-color: rgba(76,175,80,0.3); }
+  .action-btn.heal-btn:hover:not(:disabled) { border-color: var(--green-bright); background: rgba(76,175,80,0.1); }
+
+  /* =================== MENU SCREEN =================== */
+  #menu-screen {
+    background: rgba(10,8,5,0.96);
+    z-index: 50;
+  }
+
+  .menu-panel {
+    background: var(--panel);
+    border: 1px solid rgba(201,168,76,0.25);
+    max-width: 500px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: clamp(20px, 3vw, 36px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .menu-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(16px, 2.5vw, 22px);
+    color: var(--gold);
+    letter-spacing: 0.3em;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding-bottom: 12px;
+  }
+
+  .menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .menu-btn {
+    background: rgba(22,18,12,0.8);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--text);
+    padding: clamp(10px, 1.5vw, 16px) clamp(16px, 2vw, 24px);
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: clamp(12px, 1.8vw, 15px);
+    letter-spacing: 0.15em;
+    text-align: left;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .menu-btn:hover {
+    background: rgba(201,168,76,0.08);
+    border-color: var(--gold);
+    transform: translateX(4px);
+    color: var(--gold);
+  }
+
+  .menu-btn .menu-icon { font-size: clamp(16px, 2.5vw, 20px); }
+
+  /* Stats display */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .stat-item {
+    background: rgba(10,8,5,0.5);
+    border: 1px solid rgba(201,168,76,0.1);
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(8px, 1.1vw, 10px);
+    color: var(--text-dim);
+    letter-spacing: 0.2em;
+  }
+
+  .stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* =================== SHOP SCREEN =================== */
+  .shop-panel {
+    max-width: 560px;
+    width: 92%;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+
+  .shop-gold {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--gold-bright);
+    text-align: center;
+    padding: 8px;
+    background: rgba(201,168,76,0.07);
+    border: 1px solid rgba(201,168,76,0.2);
+    letter-spacing: 0.2em;
+  }
+
+  .shop-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .shop-item {
+    background: rgba(22,18,12,0.8);
+    border: 1px solid rgba(201,168,76,0.15);
+    padding: clamp(10px, 1.5vw, 16px);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .shop-item:hover:not(.cannot-afford) {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.07);
+    transform: translateX(3px);
+  }
+
+  .shop-item.cannot-afford { opacity: 0.4; cursor: not-allowed; }
+
+  .shop-item-icon { font-size: clamp(22px, 3.5vw, 32px); flex-shrink: 0; }
+
+  .shop-item-info { flex: 1; }
+
+  .shop-item-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(11px, 1.6vw, 14px);
+    color: var(--text);
+    letter-spacing: 0.1em;
+    margin-bottom: 3px;
+  }
+
+  .shop-item-desc {
+    font-size: clamp(11px, 1.4vw, 13px);
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .shop-item-cost {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(12px, 1.8vw, 16px);
+    color: var(--gold-bright);
+    flex-shrink: 0;
+  }
+
+  /* =================== ENCOUNTER SCREEN =================== */
+  #encounter-screen {
+    background: rgba(10,8,5,0.97);
+    z-index: 40;
+  }
+
+  .encounter-panel {
+    background: var(--panel);
+    border: 1px solid rgba(201,168,76,0.2);
+    max-width: 480px;
+    width: 90%;
+    padding: clamp(20px, 3vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .encounter-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(11px, 1.5vw, 13px);
+    color: var(--gold);
+    letter-spacing: 0.35em;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    padding-bottom: 10px;
+  }
+
+  .encounter-num {
+    font-size: clamp(10px, 1.3vw, 12px);
+    color: var(--text-dim);
+    text-align: center;
+    font-style: italic;
+  }
+
+  /* =================== LEVEL COMPLETE =================== */
+  #level-complete-screen {
+    background: rgba(10,8,5,0.97);
+    z-index: 60;
+  }
+
+  .complete-panel {
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .complete-icon {
+    font-size: clamp(48px, 8vw, 80px);
+    animation: completePulse 1s ease-in-out infinite;
+  }
+
+  .complete-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(20px, 3vw, 30px);
+    color: var(--gold-bright);
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 30px rgba(255,215,0,0.4);
+  }
+
+  .complete-rewards {
+    background: rgba(22,18,12,0.8);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 16px 24px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+  }
+
+  .reward-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: clamp(13px, 1.8vw, 16px);
+  }
+
+  .reward-key { color: var(--text-dim); font-style: italic; }
+  .reward-val { color: var(--gold); font-family: 'Cinzel', serif; font-weight: 700; }
+
+  /* =================== GAME OVER SCREEN =================== */
+  #gameover-screen {
+    background: radial-gradient(ellipse, #1a0000 0%, #0a0000 60%, #050000 100%);
+    z-index: 70;
+  }
+
+  .gameover-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .gameover-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(36px, 7vw, 80px);
+    font-weight: 900;
+    color: var(--blood-bright);
+    text-shadow: 0 0 40px rgba(204,0,0,0.5), 0 0 80px rgba(139,0,0,0.3);
+    animation: gameoverPulse 2s ease-in-out infinite;
+    letter-spacing: 0.1em;
+  }
+
+  .gameover-subtitle {
+    font-size: clamp(14px, 2vw, 20px);
+    color: var(--text-dim);
+    font-style: italic;
+    max-width: 400px;
+    line-height: 1.6;
+  }
+
+  /* =================== ENDING SCREEN =================== */
+  #ending-screen {
+    background: radial-gradient(ellipse, #0f0a04 0%, #050402 100%);
+    z-index: 80;
+    padding: 30px;
+    overflow-y: auto;
+  }
+
+  .ending-content {
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .ending-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 4vw, 40px);
+    color: var(--gold-bright);
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 30px rgba(255,215,0,0.4);
+  }
+
+  .ending-text {
+    font-size: clamp(15px, 2vw, 18px);
+    line-height: 1.9;
+    color: var(--text);
+    font-style: italic;
+  }
+
+  .ending-stats {
+    background: rgba(22,18,12,0.8);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 20px 28px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* =================== QUEST SCREEN =================== */
+  #quest-screen {
+    background: rgba(10,8,5,0.97);
+    z-index: 45;
+  }
+
+  .quest-panel {
+    background: var(--panel);
+    border: 1px solid rgba(201,168,76,0.2);
+    max-width: 500px;
+    width: 92%;
+    padding: clamp(20px, 3vw, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .quest-scroll {
+    background: rgba(30,22,12,0.6);
+    border: 1px solid rgba(201,168,76,0.15);
+    padding: 16px 20px;
+    font-style: italic;
+    font-size: clamp(14px, 1.9vw, 17px);
+    line-height: 1.7;
+    color: var(--text);
+    position: relative;
+  }
+
+  .quest-scroll::before {
+    content: '❝';
+    font-size: 36px;
+    color: rgba(201,168,76,0.15);
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    font-style: normal;
+  }
+
+  /* =================== BOSS WARNING =================== */
+  #boss-warning {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 35;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  #boss-warning.show { display: flex; }
+
+  .boss-warning-text {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(24px, 5vw, 52px);
+    font-weight: 900;
+    color: var(--blood-bright);
+    letter-spacing: 0.15em;
+    text-shadow: 0 0 40px rgba(204,0,0,0.7);
+    animation: bossWarn 0.5s ease-in-out infinite alternate;
+    text-align: center;
+  }
+
+  .boss-name-warn {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 2.5vw, 24px);
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-align: center;
+    animation: fadeIn 1s ease forwards;
+  }
+
+  /* =================== ANIMATIONS =================== */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes titleDrop {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes expandWidth {
+    from { width: 0; }
+    to { width: 300px; }
+  }
+
+  @keyframes swordPulse {
+    0%, 100% { transform: rotate(-5deg) scale(1); }
+    50% { transform: rotate(5deg) scale(1.05); }
+  }
+
+  @keyframes moonGlow {
+    0%, 100% { box-shadow: 0 0 30px rgba(240,216,144,0.4), 0 0 60px rgba(200,160,64,0.2); }
+    50% { box-shadow: 0 0 50px rgba(240,216,144,0.6), 0 0 90px rgba(200,160,64,0.3); }
+  }
+
+  @keyframes idleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  @keyframes enemyIdle {
+    0%, 100% { transform: scaleX(-1) translateY(0); }
+    50% { transform: scaleX(-1) translateY(-3px); }
+  }
+
+  @keyframes attackSlash {
+    0% { transform: translateX(0) rotate(0deg); }
+    30% { transform: translateX(clamp(20px,4vw,40px)) rotate(-10deg) scaleX(1.1); }
+    60% { transform: translateX(clamp(30px,5vw,55px)) rotate(5deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+  }
+
+  @keyframes hitRecoil {
+    0% { transform: scaleX(-1) translateX(0); }
+    40% { transform: scaleX(-1) translateX(clamp(8px,1.5vw,15px)); }
+    100% { transform: scaleX(-1) translateX(0); }
+  }
+
+  @keyframes heavySlash {
+    0% { transform: translateX(0) rotate(0) scale(1); }
+    20% { transform: translateX(-10px) rotate(-20deg) scale(0.9); }
+    50% { transform: translateX(clamp(35px,6vw,65px)) rotate(15deg) scale(1.15); }
+    100% { transform: translateX(0) rotate(0) scale(1); }
+  }
+
+  @keyframes deathFall {
+    0% { transform: scaleX(-1) rotate(0); opacity: 1; }
+    100% { transform: scaleX(-1) rotate(90deg) translateX(30px); opacity: 0.3; }
+  }
+
+  @keyframes slashFade {
+    0% { opacity: 1; transform: scale(0.5) rotate(-20deg); }
+    50% { opacity: 1; transform: scale(1.2) rotate(10deg); }
+    100% { opacity: 0; transform: scale(1.5) rotate(20deg); }
+  }
+
+  @keyframes dmgFloat {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    30% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-50px) scale(0.8); }
+  }
+
+  @keyframes flashPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes hpPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  @keyframes completePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  @keyframes gameoverPulse {
+    0%, 100% { text-shadow: 0 0 40px rgba(204,0,0,0.5); }
+    50% { text-shadow: 0 0 80px rgba(204,0,0,0.9), 0 0 120px rgba(139,0,0,0.5); }
+  }
+
+  @keyframes bossWarn {
+    from { opacity: 0.7; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1.03); }
+  }
+
+  @keyframes particleFly {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) rotate(var(--tr)); opacity: 0; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--dark2); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); }
+
+  /* =================== RESPONSIVE TWEAKS =================== */
+  @media (max-width: 480px) {
+    .action-grid { grid-template-columns: repeat(2, 1fr); }
+    .hud-top { flex-wrap: wrap; }
+  }
+
+  @media (max-height: 500px) {
+    .battle-arena { min-height: 120px; }
+    .characters-layer { bottom: 32%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- =================== TITLE SCREEN =================== -->
+<div id="title-screen" class="screen active">
+  <canvas class="title-bg-particles" id="bgCanvas"></canvas>
+  <div class="title-content">
+    <div class="title-jp">刀のプラディープ</div>
+    <div class="title-main">KATANA NO</div>
+    <div class="title-name">PRADEEP</div>
+    <div class="title-divider"></div>
+    <div class="title-subtitle">A Samurai's Oath in Feudal Japan</div>
+    <div class="title-sword">⚔️</div>
+    <button class="btn-primary" onclick="startGame()">BEGIN YOUR OATH</button>
+    <button class="btn-secondary" onclick="showScreen('origin-screen'); startOrigin()">HOW TO PLAY</button>
+  </div>
+  <div class="title-warning">Contains dark themes — violence, loss, ruthless choices</div>
+</div>
+
+<!-- =================== ORIGIN / STORY SCREEN =================== -->
+<div id="origin-screen" class="screen">
+  <div class="story-container">
+
+    <!-- Scene 0: Fire -->
+    <div id="scene-0" class="story-scene active">
+      <div class="scene-header">CHAPTER ZERO — THE NIGHT EVERYTHING BURNED</div>
+      <div class="story-text">
+        It was the smell that woke you.<br><br>
+        Not smoke. Smoke has a kind of warmth to it.<br>
+        This was <span class="highlight">burning flesh.</span><br><br>
+        The merchant caravan you had been guarding — twelve wagons, thirty-one people — was <span class="highlight">GONE.</span><br><br>
+        Not robbed. Not scattered.<br>
+        <span class="highlight">Gone.</span><br><br>
+        Ash and charred bone were all that remained. And a single black arrow lodged in the earth, inches from your sleeping head.
+      </div>
+      <div class="flash-text">⚠ SOMEONE LEFT YOU ALIVE. ON PURPOSE. ⚠</div>
+      <div class="story-text">
+        A warning. Or an invitation.<br><br>
+        Among the wreckage, something moved — a boy, no older than twelve. His left hand was gone at the wrist. <span class="highlight">Cauterized. Deliberately.</span><br><br>
+        <span class="gold-text">"They took my sister,"</span> he whispered. <span class="gold-text">"The men with the black crests. They laughed while they did it."</span><br><br>
+        He pressed something into your hand. A cloth badge. Black. <span class="highlight">A serpent eating its own tail.</span>
+      </div>
+      <div class="flash-text">☠ YOU RECOGNIZE THE SYMBOL — OROCHI CLAN ☠</div>
+      <div class="story-text">The most feared criminal syndicate in western Japan. They don't leave witnesses. <span class="highlight">Except when they want someone to suffer.</span></div>
+      <div class="choice-grid">
+        <div class="scene-header">THE BOY IS DYING. WHAT DO YOU DO?</div>
+        <button class="choice-btn" onclick="originChoice(0,1)">
+          <span class="choice-label">OPTION I — CARRY HIM TO SAFETY</span>
+          You lift him without a word. At Kurokawa you leave him with a healer. Before you go he whispers: <em>"His name is Katsuro. He wears a silver mask."</em>
+          <div class="choice-reward">▶ Max HP +10 — His survival hardens your resolve</div>
+        </button>
+        <button class="choice-btn" onclick="originChoice(0,2)">
+          <span class="choice-label">OPTION II — BIND HIS WOUND AND LEAVE</span>
+          You tear your sleeve into bandages. Leave your water skin. You do not look back. Emotion is a blade that cuts its own wielder.
+          <div class="choice-reward">▶ Max Stamina +15, Gold +30 — Cold efficiency. Ruthless clarity.</div>
+        </button>
+        <button class="choice-btn" onclick="originChoice(0,3)">
+          <span class="choice-label">OPTION III — SIT WITH HIM UNTIL DAWN</span>
+          You listen for two hours. Routes. Faces. Guard counts. By sunrise you have a map drawn in ash on a dead man's coat.
+          <div class="choice-reward">▶ Defense +2 — Knowledge is the strongest armor.</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scene 1: Origin -->
+    <div id="scene-1" class="story-scene">
+      <div class="scene-header">SCENE II — KUROKAWA</div>
+      <div class="story-text">
+        Kurokawa is a village that has forgotten what safety feels like.<br><br>
+        The gates are unguarded. The wells are dry. Children do not play in the streets.<br><br>
+        An old woman sits outside a burned shrine, cleaning a wound on her forearm with the calm detachment of someone for whom pain has become <span class="highlight">routine.</span><br><br>
+        <span class="gold-text">"Another wanderer,"</span> she says. <span class="gold-text">"They always come. They always leave."</span><br><br>
+        <span class="gold-text">"The Orochi men came three nights ago. Took the young. Left the rest to remember."</span><br><br>
+        She points a crooked finger at the road north. <span class="gold-text">"No one who goes that way comes back."</span>
+      </div>
+      <div class="choice-grid">
+        <div class="scene-header">WHAT MADE PRADEEP A WARRIOR?</div>
+        <button class="choice-btn" onclick="originChoice(1,1)">
+          <span class="choice-label">SOLDIER — TRAINED FROM AGE EIGHT</span>
+          You were seven when the general pulled you from a burning village and handed you a training sword. <em>"Cry later. Train now."</em> You cried later. Then you stopped.
+          <div class="choice-reward">▶ Max HP +15, Defense +3 — A soldier's body. A soldier's scars.</div>
+        </button>
+        <button class="choice-btn" onclick="originChoice(1,2)">
+          <span class="choice-label">STREET FIGHTER — NO TRAINING, JUST SURVIVAL</span>
+          No dojo. No master. You learned in alleys where the only rule is: don't die. Your style is ugly. Effective. You've buried everyone who underestimated you.
+          <div class="choice-reward">▶ Weapon Damage +8 min / +4 max — Street violence has no elegance. Only results.</div>
+        </button>
+        <button class="choice-btn" onclick="originChoice(1,3)">
+          <span class="choice-label">MONK'S STUDENT — DISCIPLINE OVER POWER</span>
+          Master Devraj found you unconscious on temple steps. For eleven years he taught you that the body is only as strong as the stillness behind it. You repaid him by leaving.
+          <div class="choice-reward">▶ Max Stamina +20, 2× Herb Tea — Discipline is a weapon that never dulls.</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scene 2: The Gate -->
+    <div id="scene-2" class="story-scene">
+      <div class="scene-header">SCENE III — THE FIRST GATE</div>
+      <div class="story-text">
+        The northern road is quiet. Too quiet.<br><br>
+        The Orochi guard at the checkpoint is picking his teeth with a knife. The knife has dried blood on it. He doesn't bother to stand when he sees you.<br><br>
+        <span class="gold-text">"Road's closed, foreigner."</span> He grins. Three teeth missing.<br>
+        <span class="highlight">"Turn around and I'll only take one hand."</span><br><br>
+        He has two companions behind him. They are not paying attention.
+      </div>
+      <div class="choice-grid">
+        <div class="scene-header">HOW DO YOU PROCEED?</div>
+        <button class="choice-btn" onclick="originChoice(2,1)">
+          <span class="choice-label">DRAW IMMEDIATELY — FAST. LOUD. BRUTAL.</span>
+          Your blade is out before he finishes his sentence. Seventeen seconds. Three men. You count the coins in their pockets.
+          <div class="choice-reward">▶ +20 Gold, −8 HP — Speed has a cost. So does mercy.</div>
+        </button>
+        <button class="choice-btn" onclick="originChoice(2,2)">
+          <span class="choice-label">PRETEND TO COMPLY — DECEPTION BEFORE STEEL</span>
+          <em>"Of course. Forgive me."</em> You step as if to turn. The guard relaxes. That is when you move. He never sees it.
+          <div class="choice-reward">▶ Weapon Damage +1/+1 — Patience is the sharpest edge.</div>
+        </button>
+        <button class="choice-btn" onclick="originChoice(2,3)">
+          <span class="choice-label">WALK PAST — FORCE HIM TO MOVE FIRST</span>
+          You walk forward. He reaches for you. That reach is his last decision. You only draw when they touch you first. The fight is entirely one-sided. You are unmarked.
+          <div class="choice-reward">▶ Defense +2 — Composure is a weapon few warriors carry.</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scene 3: The Oath -->
+    <div id="scene-3" class="story-scene">
+      <div class="scene-header">SCENE IV — THE OATH</div>
+      <div class="story-text">
+        You stand over the fallen men. The road north stretches into darkness.<br><br>
+        Somewhere at the end of it:<br>
+        <span class="gold-text">Jinpachi. Raijin. Muramasa.</span><br>
+        <span class="gold-text">Katsuro with his silver mask.</span><br>
+        And behind all of them —<br>
+        <span class="highlight">Akuma-no-Ken. The Devil Swordsman.</span><br><br>
+        You clean your blade on the grass. You do not pray. You do not hesitate.
+      </div>
+      <div class="flash-text">
+        ⚔ "Every man who wore that black crest will answer for what they did. Every. Single. One." ⚔
+      </div>
+      <div class="story-text" id="origin-summary"></div>
+      <button class="btn-primary" style="align-self:center; margin-top:10px;" onclick="beginLevel1()">BEGIN LEVEL 1 ⚔</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =================== MAIN GAME SCREEN =================== -->
+<div id="game-screen" class="screen">
+
+  <!-- Battle Arena -->
+  <div class="battle-arena" id="battleArena">
+    <div class="arena-sky"></div>
+    <div class="arena-moon"></div>
+
+    <!-- Mountain SVG -->
+    <div class="arena-mountains">
+      <svg class="mountain-svg" viewBox="0 0 800 200" preserveAspectRatio="none">
+        <polygon points="0,200 100,60 200,200" fill="#0d0908" opacity="0.8"/>
+        <polygon points="80,200 220,30 360,200" fill="#110c07" opacity="0.9"/>
+        <polygon points="200,200 340,50 480,200" fill="#0d0908" opacity="0.8"/>
+        <polygon points="380,200 500,70 620,200" fill="#110c07" opacity="0.9"/>
+        <polygon points="550,200 680,40 800,200" fill="#0d0908" opacity="0.8"/>
+        <polygon points="680,200 760,80 800,200" fill="#110c07" opacity="0.9"/>
+      </svg>
+    </div>
+
+    <div class="arena-ground"><div class="ground-line"></div></div>
+    <div class="arena-particles-container" id="arenaParticles"></div>
+
+    <!-- HUD Top -->
+    <div class="hud-top">
+      <div class="hud-player-section">
+        <div class="hud-char-name" id="hudPlayerName">PRADEEP</div>
+        <div class="bar-container">
+          <div class="bar-row">
+            <div class="bar-label">HP</div>
+            <div class="bar-track" style="flex:1">
+              <div class="bar-fill hp-fill" id="playerHpBar" style="width:100%"></div>
+            </div>
+            <div class="bar-value" id="playerHpVal">100/100</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label">ST</div>
+            <div class="bar-track" style="flex:1">
+              <div class="bar-fill stamina-fill" id="playerStBar" style="width:100%"></div>
+            </div>
+            <div class="bar-value" id="playerStVal">100/100</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-badge">
+        <div class="level-num" id="hudLevel">1</div>
+        <div class="level-label">LEVEL</div>
+        <div class="xp-bar-mini">
+          <div class="xp-fill-mini" id="xpBarMini" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="hud-enemy-section">
+        <div class="hud-char-name" id="hudEnemyName" style="text-align:right">—</div>
+        <div class="bar-container">
+          <div class="bar-row" style="flex-direction:row-reverse">
+            <div class="bar-label" style="text-align:right">HP</div>
+            <div class="bar-track" style="flex:1">
+              <div class="bar-fill enemy-hp-fill" id="enemyHpBar" style="width:100%"></div>
+            </div>
+            <div class="bar-value" id="enemyHpVal" style="text-align:left">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Characters -->
+    <div class="characters-layer">
+      <div class="character-wrapper" id="playerWrapper">
+        <div class="character-name-tag">PRADEEP</div>
+        <div class="character-sprite pradeep-sprite idle-anim" id="pradeepSprite">
+          <!-- Pradeep SVG -->
+          <svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <!-- Body glow -->
+            <ellipse cx="50" cy="75" rx="30" ry="60" fill="rgba(201,168,76,0.04)"/>
+            <!-- Robe/hakama -->
+            <path d="M30 70 L28 140 L45 135 L50 110 L55 135 L72 140 L70 70 Z" fill="#1a1208" stroke="#2a1f10" stroke-width="1"/>
+            <!-- Robe detail lines -->
+            <line x1="50" y1="70" x2="50" y2="130" stroke="#2a1f10" stroke-width="0.8" opacity="0.6"/>
+            <!-- Obi (belt) -->
+            <rect x="30" y="72" width="40" height="8" rx="1" fill="#8b6914" opacity="0.8"/>
+            <rect x="30" y="74" width="40" height="2" fill="#c9a84c" opacity="0.5"/>
+            <!-- Upper body / kimono -->
+            <path d="M35 40 L30 70 L70 70 L65 40 Z" fill="#1c140a" stroke="#2a1f10" stroke-width="1"/>
+            <!-- Kimono collar -->
+            <path d="M50 38 L43 55 L50 52 L57 55 Z" fill="#0a0805" stroke="#2a1f10" stroke-width="0.8"/>
+            <!-- Neck -->
+            <rect x="46" y="28" width="8" height="12" rx="3" fill="#c8a878"/>
+            <!-- Head -->
+            <ellipse cx="50" cy="22" rx="14" ry="16" fill="#c8a878"/>
+            <!-- Face details -->
+            <ellipse cx="44" cy="20" rx="2.5" ry="2" fill="#5a3a1a"/>
+            <ellipse cx="56" cy="20" rx="2.5" ry="2" fill="#5a3a1a"/>
+            <path d="M45 27 Q50 30 55 27" stroke="#8b5a3a" stroke-width="1.2" fill="none"/>
+            <!-- Hair / top-knot -->
+            <ellipse cx="50" cy="8" rx="13" ry="10" fill="#1a1008"/>
+            <rect x="47" y="2" width="6" height="10" rx="3" fill="#1a1008"/>
+            <!-- Headband -->
+            <rect x="38" y="13" width="24" height="4" rx="2" fill="#8b0000"/>
+            <line x1="38" y1="15" x2="62" y2="15" stroke="#cc0000" stroke-width="0.8" opacity="0.7"/>
+            <!-- Left arm holding sword -->
+            <path d="M30 45 L18 65 L22 67 L34 48 Z" fill="#c8a878"/>
+            <!-- Right arm -->
+            <path d="M70 45 L78 60 L74 62 L66 48 Z" fill="#c8a878"/>
+            <!-- KATANA -->
+            <g transform="rotate(-30, 22, 65)">
+              <!-- Handle -->
+              <rect x="15" y="62" width="14" height="5" rx="2" fill="#3a2510"/>
+              <rect x="15" y="63" width="14" height="1" fill="#c9a84c" opacity="0.6"/>
+              <!-- Guard -->
+              <ellipse cx="29" cy="64" rx="3" ry="5" fill="#8b6914"/>
+              <!-- Blade -->
+              <path d="M29 62 L70 52 L70 57 L29 67 Z" fill="url(#bladeGrad)"/>
+              <!-- Blade shine -->
+              <line x1="30" y1="60" x2="69" y2="51" stroke="rgba(255,255,255,0.6)" stroke-width="0.8"/>
+            </g>
+            <!-- Sandals -->
+            <ellipse cx="38" cy="141" rx="8" ry="3" fill="#3a2510"/>
+            <ellipse cx="62" cy="141" rx="8" ry="3" fill="#3a2510"/>
+            <defs>
+              <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#8a8a9a;stop-opacity:1"/>
+                <stop offset="40%" style="stop-color:#d4d4e0;stop-opacity:1"/>
+                <stop offset="70%" style="stop-color:#c0c0cc;stop-opacity:1"/>
+                <stop offset="100%" style="stop-color:#6a6a7a;stop-opacity:1"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="character-shadow"></div>
+      </div>
+
+      <div class="character-wrapper" id="enemyWrapper">
+        <div class="character-name-tag" id="enemyNameTag">—</div>
+        <div class="character-sprite enemy-sprite enemy-idle" id="enemySprite">
+          <!-- Enemy SVG (ronin/villain) -->
+          <svg viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <ellipse cx="50" cy="75" rx="30" ry="60" fill="rgba(139,0,0,0.04)"/>
+            <!-- Dark robe -->
+            <path d="M28 70 L26 140 L44 135 L50 108 L56 135 L74 140 L72 70 Z" fill="#100804" stroke="#1a0f08" stroke-width="1"/>
+            <line x1="50" y1="70" x2="50" y2="130" stroke="#1a0f08" stroke-width="0.8" opacity="0.6"/>
+            <!-- Dark belt -->
+            <rect x="28" y="72" width="44" height="8" rx="1" fill="#2a1008" opacity="0.9"/>
+            <rect x="28" y="74" width="44" height="2" fill="#8b0000" opacity="0.5"/>
+            <!-- Upper dark kimono -->
+            <path d="M33 38 L28 70 L72 70 L67 38 Z" fill="#120a04" stroke="#1a0f08" stroke-width="1"/>
+            <path d="M50 36 L42 53 L50 50 L58 53 Z" fill="#080604" stroke="#1a0f08" stroke-width="0.8"/>
+            <!-- Neck -->
+            <rect x="46" y="26" width="8" height="13" rx="3" fill="#9a7858"/>
+            <!-- Head with mask hint -->
+            <ellipse cx="50" cy="20" rx="14" ry="16" fill="#9a7858"/>
+            <!-- Mask (lower face) -->
+            <path d="M37 22 Q50 35 63 22 L63 18 Q50 10 37 18 Z" fill="#2a1a0a" opacity="0.7"/>
+            <!-- Eyes - menacing -->
+            <ellipse cx="43" cy="17" rx="3" ry="2.5" fill="#8b0000"/>
+            <ellipse cx="57" cy="17" rx="3" ry="2.5" fill="#8b0000"/>
+            <ellipse cx="43" cy="17" rx="1.5" ry="1.5" fill="#200000"/>
+            <ellipse cx="57" cy="17" rx="1.5" ry="1.5" fill="#200000"/>
+            <!-- Scar -->
+            <line x1="55" y1="12" x2="60" y2="24" stroke="#5a2a1a" stroke-width="1.5"/>
+            <!-- Dark hair -->
+            <ellipse cx="50" cy="7" rx="14" ry="11" fill="#0a0806"/>
+            <!-- Armor plates -->
+            <rect x="32" y="40" width="12" height="15" rx="1" fill="#1a0f08" stroke="#2a1408" stroke-width="1"/>
+            <rect x="56" y="40" width="12" height="15" rx="1" fill="#1a0f08" stroke="#2a1408" stroke-width="1"/>
+            <!-- Left arm with weapon -->
+            <path d="M28 44 L16 60 L20 63 L32 47 Z" fill="#9a7858"/>
+            <!-- Right arm -->
+            <path d="M72 44 L80 58 L76 61 L68 47 Z" fill="#9a7858"/>
+            <!-- Enemy weapon (darker blade) -->
+            <g transform="rotate(-35, 18, 62)">
+              <rect x="12" y="59" width="14" height="5" rx="2" fill="#1a0f08"/>
+              <rect x="12" y="60" width="14" height="1.5" fill="#8b0000" opacity="0.7"/>
+              <ellipse cx="26" cy="61" rx="3" ry="5" fill="#3a1a08"/>
+              <path d="M26 59 L72 46 L72 52 L26 64 Z" fill="url(#darkBladeGrad)"/>
+              <line x1="27" y1="57" x2="71" y2="45" stroke="rgba(200,100,50,0.4)" stroke-width="0.8"/>
+            </g>
+            <!-- Dark sandals -->
+            <ellipse cx="37" cy="141" rx="8" ry="3" fill="#1a0f08"/>
+            <ellipse cx="63" cy="141" rx="8" ry="3" fill="#1a0f08"/>
+            <defs>
+              <linearGradient id="darkBladeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#4a4a5a;stop-opacity:1"/>
+                <stop offset="50%" style="stop-color:#7a6a5a;stop-opacity:1"/>
+                <stop offset="100%" style="stop-color:#3a3a4a;stop-opacity:1"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="character-shadow"></div>
+      </div>
+    </div>
+
+    <!-- Boss warning overlay -->
+    <div id="boss-warning">
+      <div class="boss-warning-text">⚠ BOSS BATTLE ⚠</div>
+      <div class="boss-name-warn" id="bossNameWarn"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Panel -->
+  <div class="bottom-panel">
+    <div class="battle-log" id="battleLog">
+      <div class="log-line new">The road north stretches into darkness...</div>
+    </div>
+    <div class="action-grid">
+      <button class="action-btn strike-btn" id="btn-strike" onclick="playerAction('strike')">
+        <div class="action-icon">⚔️</div>
+        <div class="action-name">STRIKE</div>
+        <div class="action-desc">Standard cut</div>
+        <div class="action-cost">Free</div>
+      </button>
+      <button class="action-btn heavy-btn" id="btn-heavy" onclick="playerAction('heavy')">
+        <div class="action-icon">💥</div>
+        <div class="action-name">HEAVY</div>
+        <div class="action-desc">Double damage</div>
+        <div class="action-cost">20 ST</div>
+      </button>
+      <button class="action-btn parry-btn" id="btn-parry" onclick="playerAction('parry')">
+        <div class="action-icon">🛡️</div>
+        <div class="action-name">PARRY</div>
+        <div class="action-desc">Block & counter</div>
+        <div class="action-cost">15 ST</div>
+      </button>
+      <button class="action-btn heal-btn" id="btn-heal" onclick="playerAction('heal')">
+        <div class="action-icon">🍵</div>
+        <div class="action-name">HERB TEA</div>
+        <div class="action-desc" id="herbCount">0 left</div>
+        <div class="action-cost">Heals HP</div>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- =================== ENCOUNTER SCREEN =================== -->
+<div id="encounter-screen" class="screen">
+  <div class="encounter-panel menu-panel">
+    <div class="menu-title">⛩ CHAPTER <span id="encLevelNum">1</span></div>
+    <div class="encounter-num" id="encCounterText">Encounter 1 of 3</div>
+    <div class="stats-grid" id="preEncStats"></div>
+    <div class="menu-options">
+      <button class="menu-btn" onclick="encounterChoice('fight')">
+        <span class="menu-icon">⚔️</span> EXPLORE & FIGHT
+      </button>
+      <button class="menu-btn" onclick="encounterChoice('shop')">
+        <span class="menu-icon">🏪</span> VISIT BLACKSMITH
+      </button>
+      <button class="menu-btn" onclick="encounterChoice('quest')">
+        <span class="menu-icon">📜</span> TAKE QUEST
+      </button>
+      <button class="menu-btn" onclick="encounterChoice('rest')">
+        <span class="menu-icon">🍵</span> REST (20 Gold — +15 HP)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- =================== SHOP SCREEN =================== -->
+<div id="shop-screen" class="screen">
+  <div class="menu-panel shop-panel">
+    <div class="menu-title">⚒ BLACKSMITH & MERCHANT</div>
+    <div class="shop-gold" id="shopGoldDisplay">Gold: 0</div>
+    <div class="shop-items" id="shopItems"></div>
+    <button class="btn-secondary" style="align-self:center;margin-top:8px;" onclick="closeShop()">← LEAVE SHOP</button>
+  </div>
+</div>
+
+<!-- =================== QUEST SCREEN =================== -->
+<div id="quest-screen" class="screen">
+  <div class="quest-panel menu-panel">
+    <div class="menu-title">📜 QUEST</div>
+    <div id="questTitle" style="font-family:'Cinzel',serif;font-size:clamp(14px,2vw,18px);color:var(--gold);letter-spacing:0.1em;"></div>
+    <div class="quest-scroll" id="questDesc"></div>
+    <div style="font-size:clamp(12px,1.6vw,14px);color:var(--green-bright);font-style:italic;" id="questReward"></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary" onclick="acceptQuest()">ACCEPT QUEST</button>
+      <button class="btn-secondary" onclick="declineQuest()">DECLINE</button>
+    </div>
+  </div>
+</div>
+
+<!-- =================== LEVEL COMPLETE =================== -->
+<div id="level-complete-screen" class="screen">
+  <div class="complete-panel">
+    <div class="complete-icon">🏯</div>
+    <div class="complete-title">LEVEL <span id="completeLvlNum">1</span> COMPLETE</div>
+    <div style="font-size:clamp(13px,1.8vw,16px);color:var(--text-dim);font-style:italic;text-align:center;" id="completeLvlQuote"></div>
+    <div class="complete-rewards" id="completeRewards"></div>
+    <button class="btn-primary" onclick="nextLevel()">CONTINUE ⚔</button>
+  </div>
+</div>
+
+<!-- =================== GAME OVER =================== -->
+<div id="gameover-screen" class="screen">
+  <div class="gameover-content">
+    <div style="font-size:clamp(48px,8vw,80px)">💀</div>
+    <div class="gameover-title">FALLEN</div>
+    <div class="gameover-subtitle" id="gameoverMsg">Pradeep falls. Japan weeps in silence. The oath goes unfulfilled.</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:10px;">
+      <button class="btn-primary" onclick="restartGame()">RENEW THE OATH</button>
+      <button class="btn-secondary" onclick="showScreen('title-screen')">MAIN MENU</button>
+    </div>
+  </div>
+</div>
+
+<!-- =================== ENDING =================== -->
+<div id="ending-screen" class="screen">
+  <div class="ending-content">
+    <div style="font-size:clamp(50px,8vw,80px)">🏆</div>
+    <div class="ending-title">THE LEGEND OF PRADEEP</div>
+    <div class="ending-text">
+      Akuma-no-Ken crumbles to the snow-covered ground.<br>
+      His sword clatters. Silence falls over Mount Fuji.<br><br>
+      Pradeep looks out over Japan — a land finally free from the shadow of tyrants.<br>
+      No master. No chains. Only the wind, the blade, and the open road.<br><br>
+      <em>He is not Japanese. He carries no clan mon.<br>
+      But Japan will remember him as one of its greatest samurai.</em>
+    </div>
+    <div class="ending-stats" id="endingStats"></div>
+    <div style="font-family:'Cinzel',serif;font-size:clamp(16px,2.5vw,22px);color:var(--gold);letter-spacing:0.3em;margin-top:10px;">~ THE END ~</div>
+    <button class="btn-secondary" style="margin-top:12px;" onclick="showScreen('title-screen')">PLAY AGAIN</button>
+  </div>
+</div>
+
+<script>
+// =================== GAME STATE ===================
+const G = {
+  player: {
+    name: 'Pradeep',
+    hp: 100, maxHp: 100,
+    stamina: 100, maxStamina: 100,
+    gold: 0,
+    level: 1, xp: 0, xpToNext: 100,
+    defense: 5,
+    weapon: { name: 'Wooden Bokken', min: 5, max: 12 },
+    inventory: [],
+    completedQuests: []
+  },
+  currentEnemy: null,
+  gameLevel: 1,
+  encounterIndex: 0,
+  totalEncounters: 0,
+  isBoss: false,
+  inCombat: false,
+  enemyTurnPending: false,
+  questActive: null,
+  questFightCount: 0,
+  shopReturnFn: null
+};
+
+// =================== ENEMY DATA ===================
+const ENEMIES = {
+  1: [
+    { name:'Kenji the Thief',      hp:40,  minDmg:4,  maxDmg:9,  def:2, xp:30,  gold:50,  quote:'"I... was just hungry..."' },
+    { name:'Takeshi the Drunkard', hp:35,  minDmg:3,  maxDmg:8,  def:1, xp:25,  gold:30,  quote:'"The sake... betrayed me..."' },
+    { name:'Ryota the Pickpocket', hp:30,  minDmg:4,  maxDmg:7,  def:1, xp:20,  gold:25,  quote:'"No one ever gave me a chance!"' }
+  ],
+  2: [
+    { name:'Hiroshi the Bandit',   hp:60,  minDmg:7,  maxDmg:14, def:4, xp:60,  gold:80,  quote:'"My clan will avenge me!"' },
+    { name:'Noboru the Deserter',  hp:55,  minDmg:6,  maxDmg:13, def:3, xp:55,  gold:70,  quote:'"I should have stayed loyal..."' },
+    { name:'Daichi the Mercenary', hp:65,  minDmg:8,  maxDmg:15, def:4, xp:65,  gold:90,  quote:'"Gold was never worth this..."' }
+  ],
+  3: [
+    { name:'Shigeru the Ronin',    hp:80,  minDmg:10, maxDmg:18, def:6, xp:90,  gold:120, quote:'"A ronin\'s fate is to fall..."' },
+    { name:'Kazuki the Shadow',    hp:75,  minDmg:9,  maxDmg:17, def:5, xp:85,  gold:110, quote:'"Darkness... claims me..."' },
+    { name:'Fumio the Betrayer',   hp:85,  minDmg:11, maxDmg:19, def:6, xp:95,  gold:130, quote:'"I betrayed my lord for nothing!"' }
+  ],
+  4: [
+    { name:'Masato the Warlord',   hp:110, minDmg:13, maxDmg:22, def:8, xp:130, gold:160, quote:'"My army will live on..."' },
+    { name:'Genzo the Poisoner',   hp:100, minDmg:12, maxDmg:20, def:7, xp:120, gold:150, quote:'"Poison is the coward\'s art... I know..."' },
+    { name:'Toshiro the Butcher',  hp:115, minDmg:14, maxDmg:23, def:9, xp:135, gold:170, quote:'"I bathed in blood... and drowned in it..."' }
+  ],
+  5: [
+    { name:'Orochi the Demon Blade',hp:150,minDmg:16, maxDmg:28, def:12,xp:200, gold:300, quote:'"Impossible... a foreigner fells me..."' }
+  ]
+};
+
+const BOSSES = {
+  1: { name:'Jinpachi the Scarred',         hp:70,  minDmg:10,maxDmg:16,def:4,  xp:80,  gold:150, quote:'"You fight well... stranger. Remember my name."' },
+  2: { name:'Raijin the Thunder Fist',      hp:100, minDmg:13,maxDmg:20,def:6,  xp:130, gold:220, quote:'"Even thunder... must bow to the blade."' },
+  3: { name:'Muramasa the Mad Priest',      hp:130, minDmg:15,maxDmg:24,def:8,  xp:180, gold:300, quote:'"The gods have abandoned me... as I abandoned them."' },
+  4: { name:'Katsuro the Shadow Shogun',    hp:165, minDmg:18,maxDmg:27,def:11, xp:240, gold:400, quote:'"A shogun defeated by a wanderer. History is cruel."' },
+  5: { name:'Akuma-no-Ken, The Devil Swordsman', hp:220,minDmg:22,maxDmg:35,def:15,xp:500,gold:600,quote:'"You... Pradeep... are the greatest warrior I have faced. I die... in honor."' }
+};
+
+const LEVEL_QUOTES = {
+  1: 'Pradeep sheathes his blade. The road darkens ahead.',
+  2: 'The pass is cleared. Merchants will travel safely once more.',
+  3: 'The temple is cleansed. The darkness retreats.',
+  4: 'The Warlord\'s domain falls. Three villages breathe free.',
+  5: 'It is done. The devil is slain.'
+};
+
+const QUESTS = {
+  1: { title:'The Missing Merchant', desc:'Old merchant Ichiro has gone missing near the eastern forest. Find him before the Orochi do.', reward:'Herb Tea ×2 + 40 Gold', fn: (p) => { p.inventory.push('Herb Tea','Herb Tea'); p.gold+=40; return 'Herb Tea ×2, +40 Gold'; } },
+  2: { title:'Bandits of Kurokawa Pass', desc:'Villagers are terrorized by Hiroshi\'s gang at Kurokawa Pass. Drive them out permanently.', reward:'+3 Min Damage + 100 Gold', fn: (p) => { p.weapon.min+=3; p.gold+=100; return '+3 Min DMG, +100 Gold'; } },
+  3: { title:'The Cursed Temple of Izanami', desc:'A mad priest has defiled the Temple of Izanami. Cleanse it with steel.', reward:'+5 Defense (Samurai Helm) + 200 Gold', fn: (p) => { p.defense+=5; p.gold+=200; return '+5 Defense, +200 Gold'; } },
+  4: { title:"The Shadow Shogun's Decree", desc:"Katsuro has enslaved three villages. Defeat his lieutenants and free the people.", reward:'HONOR BLADE [25-42] + 300 Gold', fn: (p) => { p.weapon={name:'Honor Blade',min:25,max:42}; p.gold+=300; return 'HONOR BLADE equipped! +300 Gold'; } },
+  5: { title:"Final Quest: The Devil's Last Stand", desc:"Akuma-no-Ken awaits at Mount Fuji's peak. End this.", reward:'Glory, Honor, and Legend', fn: (p) => { return 'Glory and Legend'; } }
+};
+
+// =================== SHOP DATA ===================
+const SHOP_ITEMS = {
+  1: [
+    { icon:'⚔️', name:'Iron Katana',   desc:'8–18 damage',        cost:80,  type:'weapon', data:{name:'Iron Katana',min:8,max:18} },
+    { icon:'🍵', name:'Herb Tea',       desc:'Heal 20–35 HP',       cost:30,  type:'herbtea' },
+    { icon:'🛡️', name:'Leather Armor', desc:'+3 Defense',          cost:60,  type:'armor',  data:3 }
+  ],
+  2: [
+    { icon:'⚔️', name:'Steel Katana',  desc:'12–24 damage',        cost:150, type:'weapon', data:{name:'Steel Katana',min:12,max:24} },
+    { icon:'🍵', name:'Herb Tea',       desc:'Heal 20–35 HP',       cost:30,  type:'herbtea' },
+    { icon:'🛡️', name:'Chain Mail',    desc:'+5 Defense',          cost:120, type:'armor',  data:5 },
+    { icon:'💊', name:'Elixir',         desc:'Heal +50 HP now',     cost:80,  type:'elixir' }
+  ],
+  3: [
+    { icon:'⚔️', name:'Demon Blade',   desc:'17–30 damage',        cost:250, type:'weapon', data:{name:'Demon Blade',min:17,max:30} },
+    { icon:'🍵', name:'Herb Tea',       desc:'Heal 20–35 HP',       cost:30,  type:'herbtea' },
+    { icon:'🛡️', name:'Samurai Armor', desc:'+8 Defense',          cost:200, type:'armor',  data:8 },
+    { icon:'💊', name:'Elixir',         desc:'Heal +50 HP now',     cost:80,  type:'elixir' }
+  ],
+  4: [
+    { icon:'⚔️', name:'Cursed Odachi', desc:'22–38 damage',        cost:400, type:'weapon', data:{name:'Cursed Odachi',min:22,max:38} },
+    { icon:'🍵', name:'Herb Tea',       desc:'Heal 20–35 HP',       cost:30,  type:'herbtea' },
+    { icon:'🛡️', name:'Shogun Armor',  desc:'+12 Defense',         cost:350, type:'armor',  data:12 },
+    { icon:'💊', name:'Elixir',         desc:'Heal +50 HP now',     cost:80,  type:'elixir' },
+    { icon:'✨', name:'Full Restore',   desc:'Full HP + Stamina',   cost:200, type:'fullhp' }
+  ],
+  5: [
+    { icon:'🍵', name:'Herb Tea',       desc:'Heal 20–35 HP',       cost:30,  type:'herbtea' },
+    { icon:'💊', name:'Elixir',         desc:'Heal +50 HP now',     cost:80,  type:'elixir' },
+    { icon:'✨', name:'Full Restore',   desc:'Full HP + Stamina',   cost:200, type:'fullhp' }
+  ]
+};
+
+// =================== UTILITIES ===================
+const rand = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function addLog(html, isNew = true) {
+  const log = document.getElementById('battleLog');
+  const lines = log.querySelectorAll('.log-line');
+  lines.forEach(l => l.classList.remove('new'));
+  const div = document.createElement('div');
+  div.className = 'log-line' + (isNew ? ' new' : '');
+  div.innerHTML = html;
+  log.appendChild(div);
+  while (log.children.length > 3) log.removeChild(log.firstChild);
+  log.scrollTop = log.scrollHeight;
+}
+
+function updateHUD() {
+  const p = G.player;
+  const pct = v => v + '%';
+
+  document.getElementById('playerHpBar').style.width = pct(clamp((p.hp/p.maxHp)*100,0,100));
+  document.getElementById('playerHpBar').className = 'bar-fill hp-fill' + (p.hp < p.maxHp*0.3 ? ' low' : '');
+  document.getElementById('playerHpVal').textContent = p.hp+'/'+p.maxHp;
+  document.getElementById('playerStBar').style.width = pct(clamp((p.stamina/p.maxStamina)*100,0,100));
+  document.getElementById('playerStVal').textContent = p.stamina+'/'+p.maxStamina;
+  document.getElementById('hudLevel').textContent = p.level;
+  document.getElementById('xpBarMini').style.width = pct(clamp((p.xp/p.xpToNext)*100,0,100));
+  document.getElementById('herbCount').textContent = p.inventory.filter(i=>i==='Herb Tea').length + ' left';
+
+  if (G.currentEnemy) {
+    const e = G.currentEnemy;
+    document.getElementById('enemyHpBar').style.width = pct(clamp((e.hp/e.maxHp)*100,0,100));
+    document.getElementById('enemyHpVal').textContent = e.hp+'/'+e.maxHp;
+    document.getElementById('hudEnemyName').textContent = e.name;
+    document.getElementById('enemyNameTag').textContent = e.name;
+  }
+}
+
+function setActionBtns(enabled) {
+  ['btn-strike','btn-heavy','btn-parry','btn-heal'].forEach(id => {
+    document.getElementById(id).disabled = !enabled;
+  });
+}
+
+// =================== PARTICLES ===================
+function spawnParticle(container, x, y, type) {
+  const el = document.createElement('div');
+  const types = {
+    blood: { chars: ['●','•','·'], colors: ['#cc0000','#8b0000','#ff3333'] },
+    spark: { chars: ['✦','★','✧','✶'], colors: ['#ffd700','#ffaa00','#fff'] },
+    sakura: { chars: ['✿','❀','✽'], colors: ['#ffb0c8','#ff80a0','#ff6090'] }
+  };
+  const t = types[type] || types.spark;
+  el.style.cssText = `
+    position:absolute; left:${x}px; top:${y}px; pointer-events:none;
+    font-size:${rand(8,16)}px; color:${t.colors[rand(0,t.colors.length-1)]};
+    z-index:30; animation:particleFly 0.8s ease forwards;
+    --tx:${rand(-40,40)}px; --ty:${rand(-50,-10)}px; --tr:${rand(-180,180)}deg;
+  `;
+  el.textContent = t.chars[rand(0,t.chars.length-1)];
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+function burstParticles(type, count = 8) {
+  const arena = document.getElementById('arenaParticles');
+  const rect = arena.getBoundingClientRect();
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      spawnParticle(arena,
+        rand(rect.width*0.3, rect.width*0.7),
+        rand(rect.height*0.2, rect.height*0.6),
+        type
+      );
+    }, i * 40);
+  }
+}
+
+function showDmgNumber(value, type, onPlayer = false) {
+  const arena = document.getElementById('battleArena');
+  const el = document.createElement('div');
+  el.className = 'damage-number dmg-' + type;
+  const x = onPlayer ? rand(5,20) : rand(65,85);
+  el.style.cssText = `left:${x}%;top:${rand(30,50)}%;`;
+  if (type === 'heal') el.textContent = '+' + value;
+  else el.textContent = (type === 'enemy' ? '-' : '-') + value;
+  arena.appendChild(el);
+  setTimeout(() => el.remove(), 1100);
+}
+
+function showSlashEffect(onEnemy = true) {
+  const arena = document.getElementById('battleArena');
+  const el = document.createElement('div');
+  el.className = 'slash-effect';
+  el.textContent = ['⚡','💥','✨','⚔'][rand(0,3)];
+  el.style.cssText = `
+    left:${onEnemy ? rand(55,75) : rand(15,30)}%;
+    top:${rand(20,45)}%;
+    color:${onEnemy ? '#ffaa44' : '#ff4444'};
+  `;
+  arena.appendChild(el);
+  setTimeout(() => el.remove(), 600);
+}
+
+// =================== CHARACTER ANIMS ===================
+function animChar(id, anim, duration = 400) {
+  const el = document.getElementById(id);
+  el.classList.remove('idle-anim','enemy-idle','attack-anim','hit-anim','heavy-anim','death-anim');
+  el.classList.add(anim);
+  setTimeout(() => {
+    el.classList.remove(anim);
+    if (id === 'pradeepSprite') el.classList.add('idle-anim');
+    else if (el.style.display !== 'none') el.classList.add('enemy-idle');
+  }, duration);
+}
+
+// =================== BACKGROUND PARTICLES ===================
+function initBgParticles() {
+  const canvas = document.getElementById('bgCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = Array.from({length:60}, () => ({
+    x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+    vx: (Math.random()-0.5)*0.3, vy: -Math.random()*0.5-0.1,
+    size: Math.random()*2+0.5, alpha: Math.random()*0.5+0.1,
+    color: Math.random() > 0.5 ? '#c9a84c' : '#8b0000'
+  }));
+
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy;
+      if (p.y < 0) { p.y = canvas.height; p.x = Math.random()*canvas.width; }
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+  canvas.style.display = 'block';
+  draw();
+}
+
+// =================== TITLE SCREEN ===================
+function startGame() {
+  showScreen('origin-screen');
+  startOrigin();
+}
+
+// =================== ORIGIN STORY ===================
+let originScene = 0;
+
+function startOrigin() {
+  originScene = 0;
+  document.querySelectorAll('.story-scene').forEach(s => s.classList.remove('active'));
+  document.getElementById('scene-0').classList.add('active');
+}
+
+function originChoice(scene, choice) {
+  const p = G.player;
+
+  if (scene === 0) {
+    if (choice===1) { p.maxHp+=10; p.hp=p.maxHp; }
+    else if (choice===2) { p.maxStamina+=15; p.stamina=p.maxStamina; p.gold+=30; }
+    else { p.defense+=2; }
+  } else if (scene === 1) {
+    if (choice===1) { p.maxHp+=15; p.hp=p.maxHp; p.defense+=3; }
+    else if (choice===2) { p.weapon.min+=8; p.weapon.max+=4; }
+    else { p.maxStamina+=20; p.stamina=p.maxStamina; p.inventory.push('Herb Tea','Herb Tea'); }
+  } else if (scene === 2) {
+    if (choice===1) { p.gold+=20; p.hp=Math.max(1,p.hp-8); }
+    else if (choice===2) { p.weapon.min+=1; p.weapon.max+=1; }
+    else { p.defense+=2; }
+  }
+
+  const nextScene = scene + 1;
+  document.querySelectorAll('.story-scene').forEach(s => s.classList.remove('active'));
+
+  if (nextScene === 3) {
+    // Show oath + summary
+    const sum = document.getElementById('origin-summary');
+    sum.innerHTML = `
+      <br><strong style="color:var(--gold);font-family:'Cinzel',serif;font-size:clamp(12px,1.8vw,15px);letter-spacing:0.2em;">YOUR ORIGIN</strong><br><br>
+      HP: <span style="color:var(--blood-bright)">${p.hp}/${p.maxHp}</span> &nbsp;|&nbsp;
+      Stamina: <span style="color:var(--green-bright)">${p.stamina}/${p.maxStamina}</span> &nbsp;|&nbsp;
+      Defense: <span style="color:var(--blue-bright)">${p.defense}</span><br>
+      Gold: <span style="color:var(--gold-bright)">${p.gold}</span> &nbsp;|&nbsp;
+      Weapon: <span style="color:var(--text)">${p.weapon.name} [${p.weapon.min}-${p.weapon.max}]</span><br>
+      Inventory: <span style="color:var(--green-bright)">${p.inventory.length > 0 ? p.inventory.join(', ') : 'Empty'}</span>
+    `;
+  }
+
+  document.getElementById('scene-' + nextScene).classList.add('active');
+}
+
+function beginLevel1() {
+  G.gameLevel = 1;
+  G.encounterIndex = 0;
+  G.totalEncounters = 2 + G.gameLevel;
+  showEncounterMenu();
+}
+
+// =================== ENCOUNTER MENU ===================
+function showEncounterMenu() {
+  const p = G.player;
+  document.getElementById('encLevelNum').textContent = G.gameLevel;
+  document.getElementById('encCounterText').textContent =
+    G.encounterIndex >= G.totalEncounters
+      ? 'BOSS ENCOUNTER AWAITS'
+      : `Encounter ${G.encounterIndex+1} of ${G.totalEncounters}`;
+
+  document.getElementById('preEncStats').innerHTML = `
+    <div class="stat-item"><div class="stat-label">HP</div><div class="stat-value">${p.hp}/${p.maxHp}</div></div>
+    <div class="stat-item"><div class="stat-label">STAMINA</div><div class="stat-value">${p.stamina}/${p.maxStamina}</div></div>
+    <div class="stat-item"><div class="stat-label">GOLD</div><div class="stat-value" style="color:var(--gold-bright)">${p.gold}</div></div>
+    <div class="stat-item"><div class="stat-label">WEAPON</div><div class="stat-value" style="font-size:clamp(11px,1.5vw,13px)">${p.weapon.name}</div></div>
+    <div class="stat-item"><div class="stat-label">DEFENSE</div><div class="stat-value">${p.defense}</div></div>
+    <div class="stat-item"><div class="stat-label">HERB TEA</div><div class="stat-value">${p.inventory.filter(i=>i==='Herb Tea').length}</div></div>
+  `;
+  showScreen('encounter-screen');
+}
+
+function encounterChoice(choice) {
+  const p = G.player;
+  if (choice === 'fight') {
+    if (G.encounterIndex >= G.totalEncounters) {
+      startBossFight();
+    } else {
+      G.encounterIndex++;
+      startFight(false);
+    }
+  } else if (choice === 'shop') {
+    G.shopReturnFn = showEncounterMenu;
+    openShop();
+  } else if (choice === 'quest') {
+    openQuest();
+  } else if (choice === 'rest') {
+    if (p.gold >= 20) {
+      p.gold -= 20; p.hp = clamp(p.hp+15, 0, p.maxHp); p.stamina = clamp(p.stamina+20,0,p.maxStamina);
+      addLog('You rest at a teahouse. <span class="log-heal">+15 HP, +20 Stamina.</span>');
+    } else {
+      addLog('<span class="log-dmg">Not enough gold to rest.</span>');
+    }
+    showEncounterMenu();
+  }
+}
+
+// =================== COMBAT ===================
+function startFight(isBoss) {
+  G.isBoss = isBoss;
+  const pool = isBoss ? [BOSSES[G.gameLevel]] : ENEMIES[G.gameLevel] || ENEMIES[5];
+  const template = pool[rand(0, pool.length-1)];
+  G.currentEnemy = { ...template, maxHp: template.hp };
+  G.inCombat = true;
+
+  showScreen('game-screen');
+  updateHUD();
+  setActionBtns(false);
+
+  if (isBoss) {
+    const warn = document.getElementById('boss-warning');
+    document.getElementById('bossNameWarn').textContent = G.currentEnemy.name;
+    warn.classList.add('show');
+    setTimeout(() => {
+      warn.classList.remove('show');
+      addLog(`<span class="log-boss">⚠ BOSS: ${G.currentEnemy.name} ⚠</span>`);
+      setActionBtns(true);
+    }, 2500);
+  } else {
+    addLog(`<span style="color:var(--text)">${G.currentEnemy.name}</span> draws their blade!`);
+    setActionBtns(true);
+  }
+
+  animChar('enemySprite','enemy-idle');
+  document.getElementById('enemySprite').style.opacity = '1';
+}
+
+function startBossFight() {
+  startFight(true);
+}
+
+async function playerAction(type) {
+  if (!G.inCombat || G.enemyTurnPending) return;
+  setActionBtns(false);
+  G.enemyTurnPending = true;
+
+  const p = G.player;
+  const e = G.currentEnemy;
+  let skipEnemyTurn = false;
+  let action_done = true;
+
+  if (type === 'strike') {
+    animChar('pradeepSprite', 'attack-anim', 350);
+    await delay(200);
+    showSlashEffect(true);
+    const raw = rand(p.weapon.min, p.weapon.max);
+    const dmg = Math.max(0, raw - e.defense);
+    e.hp -= dmg;
+    showDmgNumber(dmg, 'normal');
+    burstParticles('blood', 5);
+    animChar('enemySprite', 'hit-anim', 300);
+    addLog(`You strike <span class="log-dmg">${G.currentEnemy.name}</span> — <span class="log-dmg">−${dmg} HP</span>`);
+
+  } else if (type === 'heavy') {
+    if (p.stamina < 20) { addLog('<span class="log-dmg">Not enough stamina!</span>'); G.enemyTurnPending=false; setActionBtns(true); return; }
+    p.stamina -= 20;
+    animChar('pradeepSprite', 'heavy-anim', 500);
+    await delay(300);
+    showSlashEffect(true);
+    const raw = rand(p.weapon.min*2, p.weapon.max*2);
+    const dmg = Math.max(0, raw - e.defense);
+    e.hp -= dmg;
+    showDmgNumber(dmg, 'heavy');
+    burstParticles('spark', 10);
+    animChar('enemySprite', 'hit-anim', 400);
+    addLog(`<span class="log-gold">HEAVY STRIKE!</span> <span class="log-dmg">−${dmg} HP</span> dealt to ${G.currentEnemy.name}`);
+
+  } else if (type === 'parry') {
+    if (p.stamina < 15) { addLog('<span class="log-dmg">Not enough stamina!</span>'); G.enemyTurnPending=false; setActionBtns(true); return; }
+    p.stamina -= 15;
+    const roll = rand(1,100);
+    if (roll > 40) {
+      animChar('pradeepSprite', 'attack-anim', 350);
+      await delay(200);
+      showSlashEffect(true);
+      const raw = rand(p.weapon.min, p.weapon.max) + 5;
+      const dmg = Math.max(0, raw - e.defense);
+      e.hp -= dmg;
+      showDmgNumber(dmg, 'normal');
+      burstParticles('spark', 6);
+      animChar('enemySprite', 'hit-anim', 300);
+      skipEnemyTurn = true;
+      addLog(`<span style="color:var(--blue-bright)">Parry SUCCESS!</span> Counter: <span class="log-dmg">−${dmg} HP</span>. Enemy staggered!`);
+    } else {
+      addLog('<span class="log-dmg">Parry failed! You are open!</span>');
+    }
+
+  } else if (type === 'heal') {
+    const idx = p.inventory.indexOf('Herb Tea');
+    if (idx === -1) { addLog('<span class="log-dmg">No Herb Tea left!</span>'); G.enemyTurnPending=false; setActionBtns(true); return; }
+    p.inventory.splice(idx,1);
+    const heal = rand(20,35);
+    p.hp = clamp(p.hp+heal, 0, p.maxHp);
+    showDmgNumber(heal, 'heal', true);
+    burstParticles('sakura', 6);
+    addLog(`You drink Herb Tea — <span class="log-heal">+${heal} HP</span> restored.`);
+    action_done = true;
+  }
+
+  updateHUD();
+  await delay(300);
+
+  if (e.hp <= 0) { enemyDied(); return; }
+
+  if (!skipEnemyTurn && action_done) {
+    await delay(400);
+    await enemyTurn();
+  } else {
+    G.enemyTurnPending = false;
+    if (G.inCombat) setActionBtns(true);
+  }
+}
+
+async function enemyTurn() {
+  const p = G.player;
+  const e = G.currentEnemy;
+  const fierce = rand(1,100) > 70;
+  let raw = rand(e.minDmg, e.maxDmg);
+  let dmg = Math.max(0, raw - p.defense);
+  if (fierce) dmg = Math.floor(dmg * 1.5);
+
+  animChar('enemySprite', 'attack-anim', 350);
+  await delay(200);
+  showSlashEffect(false);
+  animChar('pradeepSprite', 'hit-anim', 300);
+  p.hp -= dmg;
+  p.hp = Math.max(0, p.hp);
+  showDmgNumber(dmg, 'enemy', true);
+  burstParticles('blood', 4);
+
+  if (fierce) addLog(`<span class="log-dmg">${e.name}</span> unleashes a <span class="log-dmg">FIERCE attack — −${dmg} HP!</span>`);
+  else addLog(`<span class="log-dmg">${e.name}</span> attacks — <span class="log-dmg">−${dmg} HP</span>`);
+
+  p.stamina = clamp(p.stamina + 8, 0, p.maxStamina);
+  updateHUD();
+  G.enemyTurnPending = false;
+
+  if (p.hp <= 0) { playerDied(); return; }
+  setActionBtns(true);
+}
+
+async function enemyDied() {
+  G.inCombat = false;
+  const e = G.currentEnemy;
+  const p = G.player;
+
+  animChar('enemySprite', 'death-anim', 800);
+  burstParticles('spark', 15);
+  burstParticles('blood', 8);
+
+  await delay(400);
+  addLog(`<span style="color:var(--gold)">"${e.quote}"</span>`);
+  await delay(600);
+  addLog(`<span class="log-gold">Victory!</span> +${e.xp} XP &nbsp; <span class="log-gold">+${e.gold} Gold</span>`);
+
+  p.xp += e.xp;
+  p.gold += e.gold;
+
+  checkLevelUp();
+  updateHUD();
+
+  await delay(1500);
+
+  // Quest fight chain?
+  if (G.questActive !== null) {
+    G.questFightCount++;
+    if (G.questFightCount >= 2) {
+      completeQuest();
+    } else {
+      addLog('Quest continues... another foe ahead!');
+      await delay(800);
+      startQuestFight();
+    }
+    return;
+  }
+
+  if (G.isBoss) {
+    showLevelComplete();
+  } else {
+    showEncounterMenu();
+  }
+}
+
+function playerDied() {
+  G.inCombat = false;
+  setActionBtns(false);
+  document.getElementById('gameoverMsg').textContent =
+    `Pradeep falls before ${G.currentEnemy.name}. Japan weeps in silence. The oath goes unfulfilled.`;
+  setTimeout(() => showScreen('gameover-screen'), 800);
+}
+
+function checkLevelUp() {
+  const p = G.player;
+  while (p.xp >= p.xpToNext) {
+    p.xp -= p.xpToNext;
+    p.level++;
+    p.xpToNext = p.level * 100;
+    p.maxHp += 20; p.hp = p.maxHp;
+    p.maxStamina += 10; p.stamina = p.maxStamina;
+    p.defense += 2;
+    addLog(`<span class="log-gold">★ LEVEL UP! Now Level ${p.level} — HP, Stamina & Defense increased!</span>`);
+    burstParticles('spark', 20);
+  }
+}
+
+// =================== SHOP ===================
+function openShop() {
+  const p = G.player;
+  document.getElementById('shopGoldDisplay').textContent = '💰 Gold: ' + p.gold;
+  const items = SHOP_ITEMS[G.gameLevel] || SHOP_ITEMS[4];
+  const container = document.getElementById('shopItems');
+  container.innerHTML = '';
+
+  items.forEach(item => {
+    const canAfford = p.gold >= item.cost;
+    const div = document.createElement('div');
+    div.className = 'shop-item' + (canAfford ? '' : ' cannot-afford');
+    div.innerHTML = `
+      <div class="shop-item-icon">${item.icon}</div>
+      <div class="shop-item-info">
+        <div class="shop-item-name">${item.name}</div>
+        <div class="shop-item-desc">${item.desc}</div>
+      </div>
+      <div class="shop-item-cost">${item.cost}G</div>
+    `;
+    if (canAfford) {
+      div.onclick = () => buyItem(item);
+    }
+    container.appendChild(div);
+  });
+
+  showScreen('shop-screen');
+}
+
+function buyItem(item) {
+  const p = G.player;
+  if (p.gold < item.cost) return;
+  p.gold -= item.cost;
+
+  if (item.type === 'herbtea') { p.inventory.push('Herb Tea'); addLog(`<span class="log-heal">Herb Tea purchased!</span>`); }
+  else if (item.type === 'elixir') { const h=50; p.hp=clamp(p.hp+h,0,p.maxHp); addLog(`<span class="log-heal">Elixir! +${h} HP</span>`); }
+  else if (item.type === 'fullhp') { p.hp=p.maxHp; p.stamina=p.maxStamina; addLog(`<span class="log-heal">Full Restore! HP and Stamina full!</span>`); }
+  else if (item.type === 'armor') { p.defense+=item.data; addLog(`<span style="color:var(--blue-bright)">${item.name} equipped! +${item.data} Defense</span>`); }
+  else if (item.type === 'weapon') { p.weapon={...item.data}; addLog(`<span class="log-gold">${item.name} equipped!</span>`); }
+
+  document.getElementById('shopGoldDisplay').textContent = '💰 Gold: ' + p.gold;
+  openShop();
+}
+
+function closeShop() {
+  if (G.shopReturnFn) G.shopReturnFn();
+  else showEncounterMenu();
+}
+
+// =================== QUESTS ===================
+function openQuest() {
+  const q = QUESTS[G.gameLevel];
+  if (!q) { showEncounterMenu(); return; }
+
+  if (G.player.completedQuests.includes(q.title)) {
+    addLog('Quest already completed.');
+    showEncounterMenu();
+    return;
+  }
+
+  document.getElementById('questTitle').textContent = q.title;
+  document.getElementById('questDesc').textContent = q.desc;
+  document.getElementById('questReward').textContent = '⚔ Reward: ' + q.reward;
+  G.questActive = G.gameLevel;
+  showScreen('quest-screen');
+}
+
+function acceptQuest() {
+  G.questFightCount = 0;
+  addLog(`<span class="log-gold">Quest accepted: ${QUESTS[G.questActive].title}</span>`);
+  startQuestFight();
+}
+
+function declineQuest() {
+  G.questActive = null;
+  showEncounterMenu();
+}
+
+function startQuestFight() {
+  const pool = ENEMIES[G.gameLevel] || ENEMIES[5];
+  const template = pool[rand(0, pool.length-1)];
+  G.currentEnemy = { ...template, maxHp: template.hp };
+  G.inCombat = true;
+  G.isBoss = false;
+  showScreen('game-screen');
+  updateHUD();
+  addLog(`Quest fight: <span class="log-dmg">${G.currentEnemy.name}</span> blocks your path!`);
+  setActionBtns(true);
+  animChar('enemySprite','enemy-idle');
+  document.getElementById('enemySprite').style.opacity='1';
+}
+
+function completeQuest() {
+  const q = QUESTS[G.questActive];
+  const reward = q.fn(G.player);
+  G.player.completedQuests.push(q.title);
+  G.questActive = null;
+  addLog(`<span class="log-gold">Quest Complete: ${q.title}! ${reward}</span>`);
+  burstParticles('spark', 20);
+  updateHUD();
+  setTimeout(showEncounterMenu, 1200);
+}
+
+// =================== LEVEL COMPLETE ===================
+function showLevelComplete() {
+  document.getElementById('completeLvlNum').textContent = G.gameLevel;
+  document.getElementById('completeLvlQuote').textContent = LEVEL_QUOTES[G.gameLevel] || '';
+  const p = G.player;
+  document.getElementById('completeRewards').innerHTML = `
+    <div class="reward-row"><span class="reward-key">Level Cleared</span><span class="reward-val">${G.gameLevel} / 5</span></div>
+    <div class="reward-row"><span class="reward-key">Pradeep's Level</span><span class="reward-val">${p.level}</span></div>
+    <div class="reward-row"><span class="reward-key">Gold</span><span class="reward-val">${p.gold}</span></div>
+    <div class="reward-row"><span class="reward-key">Weapon</span><span class="reward-val">${p.weapon.name}</span></div>
+    <div class="reward-row"><span class="reward-key">Defense</span><span class="reward-val">${p.defense}</span></div>
+    <div class="reward-row"><span class="reward-key">Quests Done</span><span class="reward-val">${p.completedQuests.length}</span></div>
+  `;
+  showScreen('level-complete-screen');
+}
+
+function nextLevel() {
+  if (G.gameLevel >= 5) {
+    showEnding();
+    return;
+  }
+  G.gameLevel++;
+  G.encounterIndex = 0;
+  G.totalEncounters = 2 + G.gameLevel;
+  G.player.stamina = G.player.maxStamina;
+  showEncounterMenu();
+}
+
+// =================== ENDING ===================
+function showEnding() {
+  const p = G.player;
+  document.getElementById('endingStats').innerHTML = `
+    <div class="reward-row"><span class="reward-key">Warrior</span><span class="reward-val">Pradeep</span></div>
+    <div class="reward-row"><span class="reward-key">Final Level</span><span class="reward-val">${p.level}</span></div>
+    <div class="reward-row"><span class="reward-key">Gold Earned</span><span class="reward-val">${p.gold}</span></div>
+    <div class="reward-row"><span class="reward-key">Final Weapon</span><span class="reward-val">${p.weapon.name}</span></div>
+    <div class="reward-row"><span class="reward-key">Defense</span><span class="reward-val">${p.defense}</span></div>
+    <div class="reward-row"><span class="reward-key">Quests Completed</span><span class="reward-val">${p.completedQuests.length}</span></div>
+  `;
+  showScreen('ending-screen');
+}
+
+// =================== RESTART ===================
+function restartGame() {
+  G.player = {
+    name:'Pradeep', hp:100,maxHp:100, stamina:100,maxStamina:100,
+    gold:0, level:1,xp:0,xpToNext:100, defense:5,
+    weapon:{name:'Wooden Bokken',min:5,max:12},
+    inventory:[], completedQuests:[]
+  };
+  G.gameLevel=1; G.encounterIndex=0; G.isBoss=false;
+  G.inCombat=false; G.questActive=null;
+  showScreen('origin-screen');
+  startOrigin();
+}
+
+// =================== UTILS ===================
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// =================== INIT ===================
+window.addEventListener('load', () => {
+  initBgParticles();
+  updateHUD();
+});
+
+window.addEventListener('resize', () => {
+  const canvas = document.getElementById('bgCanvas');
+  if (canvas) { canvas.width=window.innerWidth; canvas.height=window.innerHeight; }
+});
+</script>
+</body>
+</html>
